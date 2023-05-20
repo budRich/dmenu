@@ -759,6 +759,11 @@ main(int argc, char *argv[])
 			colors[SchemeSel][ColFg] = argv[++i];
 		else if (!strcmp(argv[i], "-w"))   /* embedding window id */
 			embed = argv[++i];
+		else if (!strcmp(argv[i], "-F")) { /* filter */
+		  strncpy(text, argv[++i], sizeof text - 1);
+		  text[sizeof text - 1] = '\0';
+		  cursor = strlen(text);
+		}
 		else
 			usage();
 
