@@ -30,7 +30,8 @@ dmenu \- dynamic menu
 .IR width ]
 .RB [ \-H
 .IR height ]
-
+.RB [ \-F
+.IR filter ]
 .P
 .BR dmenu_run " ..."
 .SH DESCRIPTION
@@ -101,6 +102,8 @@ override automatic width of the menu.
 .TP
 .BI \-H " position"
 override automatic height of the menu.
+.BI \-F " filter"
+filter will be pre entered as text.
 .SH USAGE
 dmenu is completely controlled by the keyboard.  Items are selected using the
 arrow keys, tab, shift+tab, page up, page down, home, and end.

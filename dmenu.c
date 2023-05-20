@@ -788,6 +788,11 @@ main(int argc, char *argv[])
 			bl_w = atoi(argv[++i]);
 		else if (!strcmp(argv[i], "-H"))   /* forced height */
 			bl_h = atoi(argv[++i]);
+		else if (!strcmp(argv[i], "-F")) { /* filter */
+		  strncpy(text, argv[++i], sizeof text - 1);
+		  text[sizeof text - 1] = '\0';
+		  cursor = strlen(text);
+		}
 		else
 			usage();
 
