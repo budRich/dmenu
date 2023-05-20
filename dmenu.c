@@ -27,6 +27,7 @@
 
 /* enums */
 enum { SchemeNorm, SchemeSel, SchemeOut, SchemeLast }; /* color schemes */
+enum { NotSet = -8210 };
 
 struct item {
 	char *text;
@@ -52,6 +53,12 @@ static XIC xic;
 
 static Drw *drw;
 static Clr *scheme[SchemeLast];
+
+/* geometry can be overridden with -X,-Y,-W,-H */
+static int bl_x = NotSet;
+static int bl_y = NotSet;
+static int bl_h = NotSet;
+static int bl_w = NotSet;
 
 #include "config.h"
 
@@ -677,6 +684,16 @@ setup(void)
 		y = topbar ? 0 : wa.height - mh;
 		mw = wa.width;
 	}
+
+	if (bl_x != NotSet)
+		x = bl_x;
+	if (bl_y != NotSet)
+		y = bl_y;
+	if (bl_w != NotSet)
+		mw = bl_w;
+	if (bl_h != NotSet)
+		mh = bl_h;
+
 	promptw = (prompt && *prompt) ? TEXTW(prompt) - lrpad / 4 : 0;
 	inputw = mw / 3; /* input width: ~33% of monitor width */
 	match();
@@ -717,7 +734,8 @@ static void
 usage(void)
 {
 	die("usage: dmenu [-bfiv] [-l lines] [-p prompt] [-fn font] [-m monitor]\n"
-	    "             [-nb color] [-nf color] [-sb color] [-sf color] [-w windowid]");
+		  "             [-nb color] [-nf color] [-sb color] [-sf color] [-w windowid]\n"
+		  "             [-X position] [-Y position] [-H height] [-W width]");
 }
 
 int
@@ -759,6 +777,14 @@ main(int argc, char *argv[])
 			colors[SchemeSel][ColFg] = argv[++i];
 		else if (!strcmp(argv[i], "-w"))   /* embedding window id */
 			embed = argv[++i];
+		else if (!strcmp(argv[i], "-X"))   /* forced X position */
+			bl_x = atoi(argv[++i]);
+		else if (!strcmp(argv[i], "-Y"))   /* forced Y postion */
+			bl_y = atoi(argv[++i]);
+		else if (!strcmp(argv[i], "-W"))   /* forced width */
+			bl_w = atoi(argv[++i]);
+		else if (!strcmp(argv[i], "-H"))   /* forced height */
+			bl_h = atoi(argv[++i]);
 		else
 			usage();
 
