@@ -717,7 +717,8 @@ static void
 usage(void)
 {
 	die("usage: dmenu [-bfiv] [-l lines] [-p prompt] [-fn font] [-m monitor]\n"
-	    "             [-nb color] [-nf color] [-sb color] [-sf color] [-w windowid]");
+	    "             [-nb color] [-nf color] [-sb color] [-sf color] [-w windowid]\n"
+	    "             [-F filter]");
 }
 
 int
