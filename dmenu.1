@@ -22,6 +22,16 @@ dmenu \- dynamic menu
 .IR color ]
 .RB [ \-w
 .IR windowid ]
+.RB [ \-X
+.IR position ]
+.RB [ \-Y
+.IR position ]
+.RB [ \-W
+.IR width ]
+.RB [ \-H
+.IR height ]
+.RB [ \-F
+.IR filter ]
 .P
 .BR dmenu_run " ..."
 .SH DESCRIPTION
@@ -80,11 +90,26 @@ prints version information to stdout, then exits.
 .TP
 .BI \-w " windowid"
 embed into windowid.
+.TP
+.BI \-X " position"
+override automatic x position of the menu.
+.TP
+.BI \-Y " position"
+override automatic y position of the menu.
+.TP
+.BI \-W " position"
+override automatic width of the menu.
+.TP
+.BI \-H " position"
+override automatic height of the menu.
+.TP
+.BI \-F " filter"
+filter will be pre entered as text.
 .SH USAGE
 dmenu is completely controlled by the keyboard.  Items are selected using the
-arrow keys, page up, page down, home, and end.
+arrow keys, tab, shift+tab, page up, page down, home, and end.
 .TP
-.B Tab
+.B Ctrl-Tab
 Copy the selected item to the input field.
 .TP
 .B Return
