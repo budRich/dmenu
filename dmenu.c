@@ -646,7 +646,13 @@ setup(void)
 	/* calculate menu geometry */
 	bh = drw->fonts->h + 2;
 	lines = MAX(lines, 0);
-	mh = (lines + 1) * bh;
+	
+	if (bl_h != NotSet) {
+		lines = MIN(bl_h/(bh+1), lines);
+		mh = bl_h;
+	} else
+		mh = (lines + 1) * bh;
+
 #ifdef XINERAMA
 	i = 0;
 	if (parentwin == root && (info = XineramaQueryScreens(dpy, &n))) {
@@ -694,8 +700,6 @@ setup(void)
 		y = bl_y;
 	if (bl_w != NotSet)
 		mw = bl_w;
-	if (bl_h != NotSet)
-		mh = bl_h;
 
 	promptw = (prompt && *prompt) ? TEXTW(prompt) - lrpad / 4 : 0;
 	inputw = mw / 3; /* input width: ~33% of monitor width */
