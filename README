@@ -2,6 +2,12 @@ dmenu - dynamic menu
 ====================
 dmenu is an efficient dynamic menu for X.
 
+This fork
+---------
+Is dmenu version 5.2 patched with positioning features
+to make it usable as a replacement for rofi when used
+with i3menu from budlabs.
+
 
 Requirements
 ------------

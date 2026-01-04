@@ -26,6 +26,7 @@
 
 /* enums */
 enum { SchemeNorm, SchemeSel, SchemeOut, SchemeLast }; /* color schemes */
+enum { NotSet = -8210 };
 
 struct item {
 	char *text;
@@ -51,6 +52,12 @@ static XIC xic;
 
 static Drw *drw;
 static Clr *scheme[SchemeLast];
+
+/* geometry can be overridden with -X,-Y,-W,-H */
+static int bl_x = NotSet;
+static int bl_y = NotSet;
+static int bl_h = NotSet;
+static int bl_w = NotSet;
 
 #include "config.h"
 
@@ -170,7 +177,7 @@ drawmenu(void)
 	if (lines > 0) {
 		/* draw vertical list */
 		for (item = curr; item != next; item = item->right)
-			drawitem(item, x, y += bh, mw - x);
+			drawitem(item, 0, y += bh, mw);
 	} else if (matches) {
 		/* draw horizontal list */
 		x += inputw;
@@ -357,6 +364,15 @@ keypress(XKeyEvent *ev)
 		case XK_n: ksym = XK_Down;      break;
 		case XK_p: ksym = XK_Up;        break;
 
+		case XK_Tab: /* default dmenu tab behaviour (autocomplete) on ctrl+tab */
+			if (!sel)
+				return;
+			cursor = strnlen(sel->text, sizeof text - 1);
+			memcpy(text, sel->text, cursor);
+			text[cursor] = '\0';
+			match();
+			break;
+
 		case XK_k: /* delete right */
 			text[cursor] = '\0';
 			match();
@@ -468,6 +484,7 @@ insert:
 		/* fallthrough */
 	case XK_Up:
 	case XK_KP_Up:
+	case XK_ISO_Left_Tab:
 		if (sel && sel->left && (sel = sel->left)->right == curr) {
 			curr = prev;
 			calcoffsets();
@@ -508,18 +525,11 @@ insert:
 		/* fallthrough */
 	case XK_Down:
 	case XK_KP_Down:
+	case XK_Tab:
 		if (sel && sel->right && (sel = sel->right) == next) {
 			curr = next;
 			calcoffsets();
 		}
-		break;
-	case XK_Tab:
-		if (!sel)
-			return;
-		cursor = strnlen(sel->text, sizeof text - 1);
-		memcpy(text, sel->text, cursor);
-		text[cursor] = '\0';
-		match();
 		break;
 	}
 
@@ -635,7 +645,13 @@ setup(void)
 	/* calculate menu geometry */
 	bh = drw->fonts->h + 2;
 	lines = MAX(lines, 0);
-	mh = (lines + 1) * bh;
+	
+	if (bl_h != NotSet) {
+		lines = MIN(bl_h/(bh+1), lines);
+		mh = bl_h;
+	} else
+		mh = (lines + 1) * bh;
+
 #ifdef XINERAMA
 	i = 0;
 	if (parentwin == root && (info = XineramaQueryScreens(dpy, &n))) {
@@ -676,6 +692,14 @@ setup(void)
 		y = topbar ? 0 : wa.height - mh;
 		mw = wa.width;
 	}
+
+	if (bl_x != NotSet)
+		x = bl_x;
+	if (bl_y != NotSet)
+		y = bl_y;
+	if (bl_w != NotSet)
+		mw = bl_w;
+
 	promptw = (prompt && *prompt) ? TEXTW(prompt) - lrpad / 4 : 0;
 	inputw = mw / 3; /* input width: ~33% of monitor width */
 	match();
@@ -715,7 +739,8 @@ static void
 usage(void)
 {
 	die("usage: dmenu [-bfiv] [-l lines] [-p prompt] [-fn font] [-m monitor]\n"
-	    "             [-nb color] [-nf color] [-sb color] [-sf color] [-w windowid]");
+		  "             [-nb color] [-nf color] [-sb color] [-sf color] [-w windowid]\n"
+		  "             [-X position] [-Y position] [-H height] [-W width] [-F filter]");
 }
 
 int
@@ -727,7 +752,7 @@ main(int argc, char *argv[])
 	for (i = 1; i < argc; i++)
 		/* these options take no arguments */
 		if (!strcmp(argv[i], "-v")) {      /* prints version information */
-			puts("dmenu-"VERSION);
+			puts("dmenu-bud-"VERSION);
 			exit(0);
 		} else if (!strcmp(argv[i], "-b")) /* appears at the bottom of the screen */
 			topbar = 0;
@@ -757,6 +782,19 @@ main(int argc, char *argv[])
 			colors[SchemeSel][ColFg] = argv[++i];
 		else if (!strcmp(argv[i], "-w"))   /* embedding window id */
 			embed = argv[++i];
+		else if (!strcmp(argv[i], "-X"))   /* forced X position */
+			bl_x = atoi(argv[++i]);
+		else if (!strcmp(argv[i], "-Y"))   /* forced Y postion */
+			bl_y = atoi(argv[++i]);
+		else if (!strcmp(argv[i], "-W"))   /* forced width */
+			bl_w = atoi(argv[++i]);
+		else if (!strcmp(argv[i], "-H"))   /* forced height */
+			bl_h = atoi(argv[++i]);
+		else if (!strcmp(argv[i], "-F")) { /* filter */
+		  strncpy(text, argv[++i], sizeof text - 1);
+		  text[sizeof text - 1] = '\0';
+		  cursor = strlen(text);
+		}
 		else
 			usage();
 
